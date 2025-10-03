@@ -26,7 +26,7 @@ const datas = [
 </script>
 
 <template>
-  <main class="flex flex-col items-center h-full px-6 sm:px-10 py-6 sm:py-10 bg-white overflow-auto">
+  <main class="flex flex-col h-full px-6 sm:px-10 py-6 sm:py-10 bg-white overflow-auto">
     <div class="max-w-[880px] w-full flex flex-col gap-6">
       <div class="flex flex-col gap-1">
         <div class="flex gap-2 items-center">
