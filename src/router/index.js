@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AboutPage from '@/pages/AboutPage.vue'
 import LoginPage from '@/pages/LoginPage.vue'
 import DashboardPage from '@/pages/DashboardPage.vue'
+import CreateNewPage from '@/pages/CreateNewPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -25,6 +26,11 @@ const router = createRouter({
       name: 'about',
       path: '/about',
       component: AboutPage,
+    },
+    {
+      name: 'create-new',
+      path: '/create-new',
+      component: CreateNewPage,
     },
   ],
 })
