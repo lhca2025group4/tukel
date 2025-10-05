@@ -1,15 +1,19 @@
 <script setup>
+import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainStore } from '../stores/main'
 import { useTotalStore } from '../stores/total'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import Modal from '../components/Modal.vue'
 
 const router = useRouter()
 const mainStore = useMainStore()
 const totalStore = useTotalStore()
 const { isLoggedIn, fetchState } = storeToRefs(mainStore)
 const { allTeams } = storeToRefs(totalStore)
+
+const isModalVisible = ref(false)
 
 mainStore.setFetchStateIdle()
 onMounted(() => {
@@ -22,6 +26,12 @@ onMounted(() => {
   }, 2000);
 })
 
+function openModal() {
+  isModalVisible.value = true
+}
+function closeModal() {
+  isModalVisible.value = false
+}
 function createNewTeam() {
   router.push({ name: 'create-new' })
 }
@@ -50,18 +60,28 @@ function createNewTeam() {
             <h3 class="hidden md:block text-base font-semibold text-slate-950">{{ team.name }}</h3>
             <span class="hidden md:block text-base font-semibold text-slate-950">|</span>
             <span class="text-base font-semibold text-slate-950">Score {{ team.score.current }} / {{ team.score.total
-              }}</span>
+            }}</span>
             <span class="text-base font-semibold text-slate-950">|</span>
             <span class="text-base font-semibold text-slate-950">{{ team.question }} Question</span>
           </div>
           <span class="text-sm font-normal text-slate-600">Members: {{ team.members.join(', ') }}</span>
           <span class="text-sm font-normal text-slate-600">Created: {{ team.createdAt }}</span>
         </div>
-        <button @click="useTotalStore.deleteTeam(team.id)"
+        <button @click="openModal"
           class="flex justify-center items-center p-3 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200 cursor-pointer">
           <i class='bx bx-trash text-base'></i>
         </button>
       </li>
     </ul>
+    <Modal :show="isModalVisible" @no="closeModal">
+      <template #title>
+        <h2 class="text-slate-950 text-2xl font-semibold">This is a Teleported Modal!</h2>
+      </template>
+      <template #body>
+        <p class="text-slate-600">
+          The HTML for this modal is rendered at the end of the `
+        </p>
+      </template>
+    </Modal>
   </main>
 </template>

@@ -28,12 +28,13 @@ function assignRandomly(teams, questions) {
 
   const sortedQuestions = [...questions].sort((a, b) => b.score - a.score)
 
-  const assignments = sortedQuestions.map(question => {
+  const assignments = sortedQuestions.map((question, idx) => {
     const memberWithLowestScore = shuffledTeams.reduce((min, current) => {
       return memberScores[current] < memberScores[min] ? current : min
     })
     memberScores[memberWithLowestScore] += question.score
     return {
+      id: idx,
       name: memberWithLowestScore,
       question: question.question,
       score: question.score,
@@ -48,6 +49,11 @@ function shuffle() {
   resultShuffle.value = assignRandomly(teams.value, questions.value)
 }
 
+function choose() {
+  detailStore.setResultShuffle(resultShuffle.value)
+  router.push({ name: 'detail' })
+}
+
 onMounted(() => {
   if (teams.value.length !== 0 && questions.value.length !== 0) {
     shuffle()
@@ -58,9 +64,9 @@ onMounted(() => {
 <template>
   <main class="flex flex-col gap-8 h-full px-6 sm:px-10 py-6 sm:py-10 bg-white overflow-auto">
     <div class="flex gap-6">
-      <button
+      <button @click="() => router.back()"
         class="h-[44px] w-[44px] flex items-center justify-center bg-white rounded hover:bg-slate-100 transition duration-200 border border-emerald-600 cursor-pointer">
-        <i @click="() => router.back()" class='bx bx-left-arrow-alt text-emerald-600 text-xl cursor-pointer'></i>
+        <i class='bx bx-left-arrow-alt text-emerald-600 text-xl cursor-pointer'></i>
       </button>
       <div class="grow flex gap-4">
         <div class="flex flex-col">
@@ -78,7 +84,7 @@ onMounted(() => {
           class="w-full bg-white text-emerald-600 p-3 rounded hover:bg-slate-100 transition duration-200 text-base font-bold border border-emerald-600 cursor-pointer">
           Repeat Shuffle
         </button>
-        <button
+        <button @click="choose"
           class="bg-emerald-600 text-white p-3 rounded hover:bg-emerald-500 transition duration-200 text-base font-bold cursor-pointer">
           Choose
         </button>
