@@ -1,63 +1,67 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useDetailStore } from '../stores/detail'
+import { useRoute, useRouter } from 'vue-router'
+import { useMainStore } from '@/stores/main'
 import { storeToRefs } from 'pinia'
 
-const detailStore = useDetailStore()
+const route = useRoute()
 const router = useRouter()
-const { name, teams, questions } = storeToRefs(detailStore)
-
+const mainStore = useMainStore()
+const { tempTeam } = storeToRefs(mainStore)
+const { getTeamMembers } = mainStore
+const { id } = route.params
 const resultShuffle = ref([])
 
-function assignRandomly(teams, questions) {
-  if (!teams || teams.length === 0 || !questions || questions.length === 0) {
+function shuffleAndAssignTeam(teamData) {
+  const teamMembers = teamData.teamMembers
+  const teamQuestions = teamData.teamQuestions
+
+  if (!teamMembers || teamMembers.length === 0 || !teamQuestions || teamQuestions.length === 0) {
     return []
   }
-
-  const shuffledTeams = [...teams]
-  for (let i = shuffledTeams.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-      ;[shuffledTeams[i], shuffledTeams[j]] = [shuffledTeams[j], shuffledTeams[i]]
+  const shuffledMembers = [...teamMembers]
+  for (let i = shuffledMembers.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffledMembers[i], shuffledMembers[j]] = [shuffledMembers[j], shuffledMembers[i]];
   }
 
   const memberScores = {}
-  shuffledTeams.forEach(member => {
-    memberScores[member] = 0
-  })
+  shuffledMembers.forEach(member => memberScores[member.name] = 0)
 
-  const sortedQuestions = [...questions].sort((a, b) => b.score - a.score)
+  const sortedQuestions = [...teamQuestions].sort((a, b) => b.score - a.score)
 
-  const assignments = sortedQuestions.map((question, idx) => {
-    const memberWithLowestScore = shuffledTeams.reduce((min, current) => {
-      return memberScores[current] < memberScores[min] ? current : min
+  const assignments = sortedQuestions.map(question => {
+    const memberWithLowestScore = shuffledMembers.reduce((minMember, currentMember) => {
+      return memberScores[currentMember.name] < memberScores[minMember.name]
+        ? currentMember
+        : minMember
     })
-    memberScores[memberWithLowestScore] += question.score
+    memberScores[memberWithLowestScore.name] += question.score
     return {
-      id: idx,
-      name: memberWithLowestScore,
+      id: question.id,
+      name: memberWithLowestScore.name,
       question: question.question,
       score: question.score,
       isFinished: question.isFinished
     }
   })
-
   return assignments
 }
 
 function shuffle() {
-  resultShuffle.value = assignRandomly(teams.value, questions.value)
+  resultShuffle.value = shuffleAndAssignTeam(tempTeam.value)
 }
 
 function choose() {
-  detailStore.setResultShuffle(resultShuffle.value)
-  router.push({ name: 'detail' })
+  const id = tempTeam.value.id
+  mainStore.setTempTeamShuffled(resultShuffle.value)
+  mainStore.addNewTeam(tempTeam.value)
+  mainStore.deleteTempTeam()
+  router.push({ name: 'detail', params: { id } })
 }
 
 onMounted(() => {
-  if (teams.value.length !== 0 && questions.value.length !== 0) {
-    shuffle()
-  }
+  shuffle()
 })
 </script>
 
@@ -71,12 +75,12 @@ onMounted(() => {
       <div class="grow flex gap-4">
         <div class="flex flex-col">
           <p class="text-base text-slate-600 font-normal">Team name</p>
-          <p class="text-base text-slate-950 font-bold">{{ name }}</p>
+          <p class="text-base text-slate-950 font-bold">{{ tempTeam.teamName }}</p>
         </div>
         <div class="w-[1px] bg-slate-300"></div>
         <div class="flex flex-col">
-          <p class="text-base text-slate-600 font-normal">Members ({{ teams.length }})</p>
-          <p class="text-base text-slate-950 font-bold">{{ teams.join(', ') }}</p>
+          <p class="text-base text-slate-600 font-normal">Members ({{ tempTeam.teamMembers.length }})</p>
+          <p class="text-base text-slate-950 font-bold">{{ getTeamMembers(tempTeam.teamMembers) }}</p>
         </div>
       </div>
       <div class="flex gap-4">

@@ -2,38 +2,58 @@
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainStore } from '../stores/main'
-import { useTotalStore } from '../stores/total'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Modal from '../components/Modal.vue'
+import allTeamJson from '../data/all-team.json'
 
 const router = useRouter()
 const mainStore = useMainStore()
-const totalStore = useTotalStore()
-const { isLoggedIn, fetchState } = storeToRefs(mainStore)
-const { allTeams } = storeToRefs(totalStore)
+const { isLoggedIn, fetchState, allTeams } = storeToRefs(mainStore)
+const { getTeamMembers, getTotalScore, getAccumulatedScore } = mainStore
 
+const tempId = ref("")
 const isModalVisible = ref(false)
 
-mainStore.setFetchStateIdle()
-onMounted(() => {
-  setTimeout(() => {
+onMounted(async () => {
+  if (allTeams.value.length === 0 || !allTeams.value) {
+    mainStore.setFetchStateIdle()
     mainStore.setFetchStateLoading()
-  }, 1000)
-  setTimeout(() => {
-    mainStore.setFetchStateCompleted()
-    totalStore.setTeamsAutomated()
-  }, 2000);
+    try {
+      const data = await fetchData()
+      mainStore.setAllTeams(data)
+      mainStore.setFetchStateCompleted()
+    } catch (error) {
+      mainStore.setFetchStateError()
+      console.error("Failed:", error.message)
+    }
+  }
 })
 
-function openModal() {
+function detailPage(id) {
+  router.push({ name: 'detail', params: { id } })
+}
+function openModal(id) {
+  tempId.value = id
   isModalVisible.value = true
 }
 function closeModal() {
   isModalVisible.value = false
 }
+function deleteTeam() {
+  mainStore.deleteAllTeams(tempId.value)
+  isModalVisible.value = false
+}
 function createNewTeam() {
   router.push({ name: 'create-new' })
+}
+async function fetchData() {
+  await new Promise(resolve => setTimeout(resolve, 1200))
+  if (Math.random() > 0.1) {
+    return allTeamJson
+  } else {
+    throw new Error("API Error: Could not retrieve team details.")
+  }
 }
 </script>
 
@@ -47,33 +67,34 @@ function createNewTeam() {
         Create New
       </button>
     </div>
-    <div v-if="fetchState.status === 'loading'" class="flex justify-center items-center h-[200px]">
-      <i class='bx bx-loader-alt text-5xl text-emerald-500 animate-spin'></i>
-      {{ fetchState.message }}
+    <div v-if="fetchState.status === 'loading'" class="flex flex-col gap-1 justify-center items-center pt-10">
+      <i class='bx bx-loader-alt text-3xl text-emerald-500 animate-spin'></i>
+      <span>{{ fetchState.message }}</span>
     </div>
     <ul v-if="fetchState.status === 'completed'" class="flex flex-col gap-3">
-      <li v-for="team in allTeams"
+      <li v-for="team in allTeams" @click.stop="detailPage(team.id)"
         class="flex items-start gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition duration-200">
         <div class="flex flex-col gap-1 grow">
-          <h3 class="block md:hidden text-base font-semibold text-slate-950">{{ team.name }}</h3>
+          <h3 class="block md:hidden text-base font-semibold text-slate-950">{{ team.teamName }}</h3>
           <div class="flex gap-1">
-            <h3 class="hidden md:block text-base font-semibold text-slate-950">{{ team.name }}</h3>
+            <h3 class="hidden md:block text-base font-semibold text-slate-950">{{ team.teamName }}</h3>
             <span class="hidden md:block text-base font-semibold text-slate-950">|</span>
-            <span class="text-base font-semibold text-slate-950">Score {{ team.score.current }} / {{ team.score.total
-            }}</span>
+            <span class="text-base font-semibold text-slate-950">Score {{ getTotalScore(team.shuffledQuestion) }} / {{
+              getAccumulatedScore(team.shuffledQuestion)
+              }}</span>
             <span class="text-base font-semibold text-slate-950">|</span>
-            <span class="text-base font-semibold text-slate-950">{{ team.question }} Question</span>
+            <span class="text-base font-semibold text-slate-950">{{ team.teamQuestions.length }} Question</span>
           </div>
-          <span class="text-sm font-normal text-slate-600">Members: {{ team.members.join(', ') }}</span>
+          <span class="text-sm font-normal text-slate-600">Members: {{ getTeamMembers(team.teamMembers) }}</span>
           <span class="text-sm font-normal text-slate-600">Created: {{ team.createdAt }}</span>
         </div>
-        <button @click="openModal"
+        <button @click.stop="openModal(team.id)"
           class="flex justify-center items-center p-3 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200 cursor-pointer">
           <i class='bx bx-trash text-base'></i>
         </button>
       </li>
     </ul>
-    <Modal :show="isModalVisible" @no="closeModal">
+    <Modal :show="isModalVisible" @no="closeModal" @yes="deleteTeam">
       <template #title>
         <h2 class="text-slate-950 text-2xl font-semibold">This is a Teleported Modal!</h2>
       </template>
