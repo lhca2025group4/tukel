@@ -15,11 +15,6 @@ const router = createRouter({
       component: DashboardPage,
     },
     {
-      name: 'dashboard',
-      path: '/dashboard',
-      component: DashboardPage,
-    },
-    {
       name: 'login',
       path: '/login',
       component: LoginPage,

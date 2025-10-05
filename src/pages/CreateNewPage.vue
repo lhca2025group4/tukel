@@ -68,8 +68,8 @@ function addNewTeam() {
 </script>
 
 <template>
-  <main class="flex flex-col gap-8 h-full px-6 sm:px-10 py-6 sm:py-10 bg-white overflow-auto">
-    <div class="flex gap-6">
+  <main class="flex flex-col gap-6 sm:gap-8 h-full px-6 sm:px-10 py-6 sm:py-10 bg-white overflow-auto">
+    <div class="flex gap-4 sm:gap-6 flex-col sm:flex-row">
       <div class="grow flex items-center gap-2">
         <p class="whitespace-nowrap" @click="insertedData">Team name:</p>
         <input v-model="teamName" type="text" placeholder="Enter team name"
@@ -80,7 +80,8 @@ function addNewTeam() {
         Start Shuffle
       </button>
     </div>
-    <div class="flex gap-10">
+    <div class="h-[1px] bg-slate-200 sm:hidden"></div>
+    <div class="flex gap-6 sm:gap-10 flex-col sm:flex-row">
       <div class="flex flex-col gap-6 flex-1">
         <div class="flex flex-col">
           <p class="text-base text-slate-950 font-semibold">Team member (Total {{ teamMembers.length }})</p>
@@ -96,9 +97,10 @@ function addNewTeam() {
             </button>
           </div>
           <button @click="() => teamMembers.push({ id: idx + 1, name: '' })"
-            class="bg-emerald-600 text-white p-3 rounded hover:bg-emerald-500 transition duration-200 text-base font-bold cursor-pointer whitespace-nowrap">Add</button>
+            class="bg-white text-emerald-600 p-3 rounded hover:bg-slate-100 transition duration-200 text-base font-bold border border-emerald-600 cursor-pointer whitespace-nowrap">Add</button>
         </div>
       </div>
+      <div class="h-[1px] bg-slate-200 sm:hidden"></div>
       <div class="flex flex-col gap-6 flex-2">
         <div class="flex flex-col">
           <p class="text-base text-slate-950 font-semibold">Question (Total {{ teamQuestions.length }})</p>
@@ -118,7 +120,7 @@ function addNewTeam() {
             </button>
           </div>
           <button @click="() => teamQuestions.push({ id: idx + 1, question: '', score: 0, isFinished: false })"
-            class="bg-emerald-600 text-white p-3 rounded hover:bg-emerald-500 transition duration-200 text-base font-bold cursor-pointer whitespace-nowrap">Add</button>
+            class="bg-white text-emerald-600 p-3 rounded hover:bg-slate-100 transition duration-200 text-base font-bold border border-emerald-600 cursor-pointer whitespace-nowrap">Add</button>
         </div>
       </div>
     </div>

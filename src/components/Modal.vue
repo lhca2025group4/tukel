@@ -10,8 +10,8 @@ defineEmits(['no', 'yes'])
 <template>
   <Teleport to="body">
     <Transition name="modal-fade">
-      <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-        <div class="flex flex-col gap-10 w-full max-w-lg rounded-lg bg-white p-8 shadow-xl">
+      <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-10">
+        <div class="flex flex-col gap-10 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
           <div class="flex flex-col gap-2">
             <slot name="title"></slot>
             <slot name="body"></slot>

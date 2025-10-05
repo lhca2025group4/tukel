@@ -31,17 +31,23 @@ function goToDashboard() {
 </script>
 
 <template>
-  <main class="flex gap-10 h-full px-6 sm:px-10 py-6 sm:py-10 bg-white overflow-auto">
-    <div class="basis-[200px] flex flex-col gap-6">
+  <main class="flex flex-col sm:flex-row gap-6 sm:gap-10 h-full px-6 sm:px-10 py-6 sm:py-10 bg-white overflow-auto">
+    <div class="basis-[200px] flex flex-col gap-4 sm:gap-6">
       <div class="flex justify-between">
         <button @click="goToDashboard"
           class="h-[44px] w-[44px] flex items-center justify-center bg-white rounded hover:bg-slate-100 transition duration-200 border border-emerald-600 cursor-pointer">
           <i class='bx bx-left-arrow-alt text-emerald-600 text-xl cursor-pointer'></i>
         </button>
-        <button @click="openModal"
-          class="h-[44px] w-[44px] flex justify-center items-center p-3 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200 cursor-pointer">
-          <i class='bx bx-trash text-base'></i>
-        </button>
+        <div class="flex gap-2">
+          <button @click="openModal"
+            class="h-[44px] w-[44px] flex justify-center items-center p-3 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200 cursor-pointer">
+            <i class='bx bx-trash text-base'></i>
+          </button>
+          <button
+            class="flex sm:hidden justify-center items-center p-3 bg-emerald-600 text-white rounded hover:bg-emerald-600 transition duration-200 cursor-pointer text-base font-bold">
+            Export to CSV
+          </button>
+        </div>
       </div>
       <div class="flex justify-between">
         <div class="flex flex-col">
@@ -63,7 +69,7 @@ function goToDashboard() {
         </div>
       </div>
       <button
-        class="flex justify-center items-center p-3 bg-emerald-600 text-white rounded hover:bg-emerald-600 transition duration-200 cursor-pointer text-base font-bold">
+        class="hidden sm:flex justify-center items-center p-3 bg-emerald-600 text-white rounded hover:bg-emerald-600 transition duration-200 cursor-pointer text-base font-bold">
         Export to CSV
       </button>
     </div>
