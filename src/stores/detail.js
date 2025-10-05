@@ -8,6 +8,7 @@ export const useDetailStore = defineStore('detail', {
     questions: [],
     updatedAt: null,
     createdAt: null,
+    resultShuffle: [],
   }),
   getters: {
     getId: (state) => state.id,
@@ -18,11 +19,9 @@ export const useDetailStore = defineStore('detail', {
     getCreatedAt: (state) => state.createdAt,
     getTotalQuestions: (state) => state.questions.length,
     getTotalScore: (state) =>
-      state.questions.reduce((total, question) => total + question.score, 0),
-    getFinishedQuestions: (state) =>
-      state.questions.filter((question) => question.isFinished).length,
+      state.resultShuffle.reduce((total, question) => total + question.score, 0),
     getAccumulatedScore: (state) =>
-      state.questions
+      state.resultShuffle
         .filter((question) => question.isFinished)
         .reduce((total, question) => total + question.score, 0),
   },
@@ -50,11 +49,8 @@ export const useDetailStore = defineStore('detail', {
     setTeams(questions) {
       this.questions = questions
     },
-    shuffleQuestions() {
-      for (let i = this.questions.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-        ;[this.questions[i], this.questions[j]] = [this.questions[j], this.questions[i]]
-      }
+    setResultShuffle(result) {
+      this.resultShuffle = result
     },
   },
 })
