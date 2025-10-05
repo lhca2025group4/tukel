@@ -1,10 +1,9 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useMainStore } from '@/stores/main'
 import { storeToRefs } from 'pinia'
 
-const route = useRoute()
 const router = useRouter()
 const mainStore = useMainStore()
 const { tempTeam } = storeToRefs(mainStore)

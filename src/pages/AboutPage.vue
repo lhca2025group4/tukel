@@ -1,26 +1,31 @@
 <script setup>
-import router from '@/router';
+import router from '@/router'
+import aflahaImg from '../assets/image/team/aflaha.png'
+import ridhoImg from '../assets/image/team/ridho.png'
+import iswaraImg from '../assets/image/team/iswara.png'
+import dellaImg from '../assets/image/team/della.png'
+import alimaImg from '../assets/image/team/alima.png'
 
 const datas = [
   {
     name: 'Aflaha',
-    img: '/src/assets/image/team/aflaha.png',
+    img: aflahaImg,
   },
   {
     name: 'Ridho',
-    img: '/src/assets/image/team/ridho.png',
+    img: ridhoImg,
   },
   {
     name: 'Iswara',
-    img: '/src/assets/image/team/iswara.png',
+    img: iswaraImg,
   },
   {
     name: 'Della',
-    img: '/src/assets/image/team/della.png',
+    img: dellaImg,
   },
   {
     name: 'Alima',
-    img: '/src/assets/image/team/alima.png',
+    img: alimaImg,
   },
 ]
 </script>
