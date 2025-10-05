@@ -1,11 +1,21 @@
 <script setup>
 import { ref } from 'vue'
-import { useDetailStore } from '../stores/detail'
 import { storeToRefs } from 'pinia'
 import Modal from '../components/Modal.vue'
+import { useMainStore } from '@/stores/main'
+import { useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
 
-const detailStore = useDetailStore()
-const { name, resultShuffle, getTotalScore, getAccumulatedScore } = storeToRefs(detailStore)
+const route = useRoute()
+const router = useRouter()
+const { id } = route.params
+const mainStore = useMainStore()
+const { allTeams } = storeToRefs(mainStore)
+const { getTotalScore, getAccumulatedScore } = mainStore
+
+const specificTeam = computed(() => {
+  return allTeams.value.find(team => team.id === id)
+})
 
 const isModalVisible = ref(false)
 
@@ -15,13 +25,16 @@ function openModal() {
 function closeModal() {
   isModalVisible.value = false
 }
+function goToDashboard() {
+  router.push({ name: 'dashboard' })
+}
 </script>
 
 <template>
   <main class="flex gap-10 h-full px-6 sm:px-10 py-6 sm:py-10 bg-white overflow-auto">
     <div class="basis-[200px] flex flex-col gap-6">
       <div class="flex justify-between">
-        <button
+        <button @click="goToDashboard"
           class="h-[44px] w-[44px] flex items-center justify-center bg-white rounded hover:bg-slate-100 transition duration-200 border border-emerald-600 cursor-pointer">
           <i class='bx bx-left-arrow-alt text-emerald-600 text-xl cursor-pointer'></i>
         </button>
@@ -33,7 +46,7 @@ function closeModal() {
       <div class="flex justify-between">
         <div class="flex flex-col">
           <span class="text-base text-slate-600">Team</span>
-          <span class="text-base text-slate-950 font-bold">{{ name }}</span>
+          <span class="text-base text-slate-950 font-bold">{{ specificTeam.teamName }}</span>
         </div>
         <button
           class="h-[44px] w-[44px] flex justify-center items-center p-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200 cursor-pointer">
@@ -43,8 +56,10 @@ function closeModal() {
       <div class="flex flex-col justify-between items-center bg-slate-100 border border-slate-300 p-3 rounded-lg">
         <span class="text-base text-slate-600">Total Score</span>
         <div class="flex flex-row items-end">
-          <span class="text-[40px] leading-[100%] text-slate-950 font-bold">{{ getAccumulatedScore }}</span>
-          <span class="text-base text-slate-950 font-bold">/ {{ getTotalScore }}</span>
+          <span class="text-[40px] leading-[100%] text-slate-950 font-bold">{{
+            getAccumulatedScore(specificTeam.shuffledQuestion)
+            }}</span>
+          <span class="text-base text-slate-950 font-bold">/ {{ getTotalScore(specificTeam.shuffledQuestion) }}</span>
         </div>
       </div>
       <button
@@ -52,8 +67,8 @@ function closeModal() {
         Export to CSV
       </button>
     </div>
-    <ul class="grow flex flex-col gap-3">
-      <li v-for="(item, idx) in resultShuffle"
+    <ul v-if="specificTeam.isShuffled" class="grow flex flex-col gap-3">
+      <li v-for="(item, idx) in specificTeam.shuffledQuestion"
         class="relative flex flex-col gap-1 p-3 border border-slate-300 rounded-lg">
         <p class="text-base font-semibold text-slate-950">Soal ke {{ idx + 1 }}.</p>
         <p class="text-base font-normal text-slate-600">{{ item.question }}</p>
