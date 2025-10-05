@@ -7,7 +7,7 @@
       <img class="w-full h-full object-cover" src="../assets/image/login.jpg" alt="">
     </div>
     <div class="flex-1 flex justify-center items-center px-6 md:px-3">
-      <div class="flex flex-col gap-7 w-full">
+      <div class="flex flex-col gap-7 w-full max-w-sm">
         <div class="flex flex-col gap-3">
           <h2 class="text-[32px] font-bold text-slate-950">Tukel</h2>
           <div class="flex flex-col gap-1">

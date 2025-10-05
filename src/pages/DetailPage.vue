@@ -5,6 +5,7 @@ import Modal from '../components/Modal.vue'
 import { useMainStore } from '@/stores/main'
 import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
+import { useTemplateRef } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -12,6 +13,8 @@ const { id } = route.params
 const mainStore = useMainStore()
 const { allTeams } = storeToRefs(mainStore)
 const { getTotalScore, getAccumulatedScore } = mainStore
+const isEditTeamName = ref(false)
+const inputTeamNameRef = useTemplateRef('inputTeamNameRef')
 
 const specificTeam = computed(() => {
   return allTeams.value.find(team => team.id === id)
@@ -25,8 +28,20 @@ function openModal() {
 function closeModal() {
   isModalVisible.value = false
 }
-function goToDashboard() {
-  router.push({ name: 'dashboard' })
+function goToHome() {
+  router.push({ name: 'home' })
+}
+function deleteTeam() {
+  mainStore.deleteAllTeams(specificTeam.value.id)
+  isModalVisible.value = false
+  router.push({ name: 'home' })
+}
+function startEditName() {
+  isEditTeamName.value = true
+  inputTeamNameRef.value.focus()
+}
+function endEditName() {
+  isEditTeamName.value = false
 }
 </script>
 
@@ -34,7 +49,7 @@ function goToDashboard() {
   <main class="flex flex-col sm:flex-row gap-6 sm:gap-10 h-full px-6 sm:px-10 py-6 sm:py-10 bg-white overflow-auto">
     <div class="basis-[200px] flex flex-col gap-4 sm:gap-6">
       <div class="flex justify-between">
-        <button @click="goToDashboard"
+        <button @click="goToHome"
           class="h-[44px] w-[44px] flex items-center justify-center bg-white rounded hover:bg-slate-100 transition duration-200 border border-emerald-600 cursor-pointer">
           <i class='bx bx-left-arrow-alt text-emerald-600 text-xl cursor-pointer'></i>
         </button>
@@ -50,14 +65,18 @@ function goToDashboard() {
         </div>
       </div>
       <div class="flex justify-between">
-        <div class="flex flex-col">
+        <div class="flex-col" :class="isEditTeamName ? 'hidden' : 'flex'">
           <span class="text-base text-slate-600">Team</span>
-          <span class="text-base text-slate-950 font-bold">{{ specificTeam.teamName }}</span>
+          <span class="text-base text-slate-950 font-bold">{{ specificTeam.teamName || '' }}</span>
         </div>
-        <button
-          class="h-[44px] w-[44px] flex justify-center items-center p-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200 cursor-pointer">
+        <button @click="startEditName"
+          class="h-[44px] w-[44px] justify-center items-center p-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition duration-200 cursor-pointer"
+          :class="isEditTeamName ? 'hidden' : 'flex'">
           <i class='bx bxs-edit-alt text-base'></i>
         </button>
+        <input ref="inputTeamNameRef" v-model="specificTeam.teamName" type="text" placeholder="Enter team name"
+          class="p-3 border bg-white border-slate-300 rounded focus:outline-emerald-500 focus:ring-1 focus:ring-emerald-500"
+          :class="isEditTeamName ? 'flex' : 'hidden'" @keyup.enter="endEditName" />
       </div>
       <div class="flex flex-col justify-between items-center bg-slate-100 border border-slate-300 p-3 rounded-lg">
         <span class="text-base text-slate-600">Total Score</span>
@@ -94,7 +113,7 @@ function goToDashboard() {
         </div>
       </li>
     </ul>
-    <Modal :show="isModalVisible" @no="closeModal">
+    <Modal :show="isModalVisible" @no="closeModal" @yes="deleteTeam">
       <template #title>
         <h2 class="text-slate-950 text-2xl font-semibold">This is a Teleported Modal!</h2>
       </template>
