@@ -1,14 +1,14 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { useMainStore } from '../stores/main'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const mainStore = useMainStore()
 const { isLoggedIn } = storeToRefs(mainStore)
 
 function buttonClick() {
-  if (isLoggedIn.value) {
-  } else {
-  }
+  router.push({ name: 'login' })
 }
 </script>
 

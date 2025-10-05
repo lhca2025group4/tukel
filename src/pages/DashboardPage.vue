@@ -60,10 +60,10 @@ async function fetchData() {
 <template>
   <main class="flex flex-col gap-3 h-full px-6 sm:px-10 py-6 sm:py-10 bg-white overflow-auto">
     <div class="flex gap-6 items-center">
-      <p v-if="!isLoggedIn" class="text-base text-slate-950 grow">You haven’t create any team.</p>
+      <p v-if="fetchState.status !== 'completed'" class="text-base text-slate-950 grow">You haven’t create any team.</p>
       <button @click="createNewTeam"
         class="bg-emerald-600 text-white p-3 rounded hover:bg-emerald-500 transition duration-200 text-base font-bold cursor-pointer whitespace-nowrap"
-        :class="{ 'w-full': isLoggedIn }">
+        :class="{ 'w-full': fetchState.status === 'completed' }">
         Create New
       </button>
     </div>
@@ -81,7 +81,7 @@ async function fetchData() {
             <span class="hidden md:block text-base font-semibold text-slate-950">|</span>
             <span class="text-base font-semibold text-slate-950">Score {{ getTotalScore(team.shuffledQuestion) }} / {{
               getAccumulatedScore(team.shuffledQuestion)
-              }}</span>
+            }}</span>
             <span class="text-base font-semibold text-slate-950">|</span>
             <span class="text-base font-semibold text-slate-950">{{ team.teamQuestions.length }} Question</span>
           </div>
