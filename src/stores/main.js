@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useMainStore = defineStore('main', {
   state: () => ({
-    isLoggedIn: false,
+    user: null,
     fetchState: {
       status: 'idle', // idle, loading, completed, error
       message: '',
