@@ -2,33 +2,16 @@
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainStore } from '../stores/main'
-import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Modal from '../components/Modal.vue'
-import allTeamJson from '../data/all-team.json'
 
 const router = useRouter()
 const mainStore = useMainStore()
-const { isLoggedIn, fetchState, allTeams } = storeToRefs(mainStore)
+const { fetchState, allTeams } = storeToRefs(mainStore)
 const { getTeamMembers, getTotalScore, getAccumulatedScore } = mainStore
 
 const tempId = ref("")
 const isModalVisible = ref(false)
-
-onMounted(async () => {
-  if (allTeams.value.length === 0 || !allTeams.value) {
-    mainStore.setFetchStateIdle()
-    mainStore.setFetchStateLoading()
-    try {
-      const data = await fetchData()
-      mainStore.setAllTeams(data)
-      mainStore.setFetchStateCompleted()
-    } catch (error) {
-      mainStore.setFetchStateError()
-      console.error("Failed:", error.message)
-    }
-  }
-})
 
 function detailPage(id) {
   router.push({ name: 'detail', params: { id } })
@@ -46,14 +29,6 @@ function deleteTeam() {
 }
 function createNewTeam() {
   router.push({ name: 'create-new' })
-}
-async function fetchData() {
-  await new Promise(resolve => setTimeout(resolve, 1200))
-  if (Math.random() > 0.1) {
-    return allTeamJson
-  } else {
-    throw new Error("API Error: Could not retrieve team details.")
-  }
 }
 </script>
 
@@ -81,7 +56,7 @@ async function fetchData() {
             <span class="hidden md:block text-base font-semibold text-slate-950">|</span>
             <span class="text-base font-semibold text-slate-950">Score {{ getTotalScore(team.shuffledQuestion) }} / {{
               getAccumulatedScore(team.shuffledQuestion)
-            }}</span>
+              }}</span>
             <span class="text-base font-semibold text-slate-950">|</span>
             <span class="text-base font-semibold text-slate-950">{{ team.teamQuestions.length }} Question</span>
           </div>

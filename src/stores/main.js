@@ -40,15 +40,21 @@ export const useMainStore = defineStore('main', {
     },
     addNewTeam(team) {
       this.allTeams.push(team)
+      setLocalStorage(this.allTeams)
     },
     deleteTempTeam() {
       this.tempTeam = {}
     },
     deleteAllTeams(id) {
       const idx = this.allTeams.findIndex((team) => team.id === id)
+      console.log(idx)
       if (idx !== -1) {
         this.allTeams.splice(idx, 1)
       }
+      setLocalStorage(this.allTeams)
+    },
+    getAllTeams() {
+      return getLocalStorage()
     },
     getTeamMembers(teamMembers) {
       return teamMembers.map((member) => member.name).join(', ')
@@ -65,3 +71,18 @@ export const useMainStore = defineStore('main', {
     },
   },
 })
+
+function getLocalStorage() {
+  let teams = localStorage.getItem('teams')
+  if (teams) return JSON.parse(teams)
+
+  // If local storage empty
+  teams = []
+  localStorage.setItem('teams', JSON.stringify([]))
+  return teams
+}
+
+function setLocalStorage(data) {
+  localStorage.setItem('teams', JSON.stringify(data))
+  return 'Success storing data'
+}
