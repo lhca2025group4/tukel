@@ -1,6 +1,6 @@
 <script setup>
 import { useMainStore } from '@/stores/main'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -18,6 +18,9 @@ const teamQuestions = ref([{
   score: 10,
   isFinished: false
 }])
+
+const isTeamMemberEmpty = computed(() => teamMembers.value.some(m => m.name.trim() === ""))
+const isTeamQuestionEmpty = computed(() => teamQuestions.value.some(q => q.question.trim() === ""))
 
 function insertedData() {
   teamName.value = "Team Alpha"
@@ -75,8 +78,9 @@ function addNewTeam() {
         <input v-model="teamName" type="text" placeholder="Enter team name"
           class="w-full p-3 border bg-white border-slate-300 rounded focus:outline-emerald-500 focus:ring-1 focus:ring-emerald-500" />
       </div>
-      <button @click="addNewTeam"
-        class="bg-emerald-600 text-white p-3 rounded hover:bg-emerald-500 transition duration-200 text-base font-bold cursor-pointer whitespace-nowrap">
+      <button @click="addNewTeam" class="  p-3 rounded transition duration-200 text-base font-bold whitespace-nowrap"
+        :class="isTeamMemberEmpty || isTeamQuestionEmpty ? 'bg-slate-200 cursor-not-allowed text-slate-600' : 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer'"
+        :disabled="isTeamMemberEmpty || isTeamQuestionEmpty">
         Start Shuffle
       </button>
     </div>

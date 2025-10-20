@@ -31,8 +31,8 @@ function closeModal() {
 function goToHome() {
   router.push({ name: 'home' })
 }
-function deleteTeam() {
-  mainStore.deleteAllTeams(specificTeam.value.id)
+async function deleteTeam() {
+  await mainStore.deleteAllTeams(specificTeam.value.id)
   isModalVisible.value = false
   router.push({ name: 'home' })
 }
@@ -83,7 +83,7 @@ function endEditName() {
         <div class="flex flex-row items-end">
           <span class="text-[40px] leading-[100%] text-slate-950 font-bold">{{
             getAccumulatedScore(specificTeam.shuffledQuestion)
-            }}</span>
+          }}</span>
           <span class="text-base text-slate-950 font-bold">/ {{ getTotalScore(specificTeam.shuffledQuestion) }}</span>
         </div>
       </div>

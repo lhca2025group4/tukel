@@ -23,8 +23,8 @@ function openModal(id) {
 function closeModal() {
   isModalVisible.value = false
 }
-function deleteTeam() {
-  mainStore.deleteAllTeams(tempId.value)
+async function deleteTeam() {
+  await mainStore.deleteAllTeams(tempId.value)
   isModalVisible.value = false
 }
 function createNewTeam() {
@@ -47,27 +47,29 @@ function createNewTeam() {
       <span>{{ fetchState.message }}</span>
     </div>
     <ul v-if="fetchState.status === 'completed'" class="flex flex-col gap-3">
-      <li v-for="team in allTeams" @click.stop="detailPage(team.id)"
-        class="flex items-start gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition duration-200">
-        <div class="flex flex-col gap-1 grow">
-          <h3 class="block md:hidden text-base font-semibold text-slate-950">{{ team.teamName }}</h3>
-          <div class="flex gap-1">
-            <h3 class="hidden md:block text-base font-semibold text-slate-950">{{ team.teamName }}</h3>
-            <span class="hidden md:block text-base font-semibold text-slate-950">|</span>
-            <span class="text-base font-semibold text-slate-950">Score {{ getTotalScore(team.shuffledQuestion) }} / {{
-              getAccumulatedScore(team.shuffledQuestion)
-              }}</span>
-            <span class="text-base font-semibold text-slate-950">|</span>
-            <span class="text-base font-semibold text-slate-950">{{ team.teamQuestions.length }} Question</span>
+      <template v-for="team in allTeams">
+        <li v-if="!team.isDeleted" @click.stop="detailPage(team.id)"
+          class="flex items-start gap-2 p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition duration-200">
+          <div class="flex flex-col gap-1 grow">
+            <h3 class="block md:hidden text-base font-semibold text-slate-950">{{ team.teamName }}</h3>
+            <div class="flex gap-1">
+              <h3 class="hidden md:block text-base font-semibold text-slate-950">{{ team.teamName }}</h3>
+              <span class="hidden md:block text-base font-semibold text-slate-950">|</span>
+              <span class="text-base font-semibold text-slate-950">Score {{ getTotalScore(team.shuffledQuestion) }} / {{
+                getAccumulatedScore(team.shuffledQuestion)
+                }}</span>
+              <span class="text-base font-semibold text-slate-950">|</span>
+              <span class="text-base font-semibold text-slate-950">{{ team.teamQuestions.length }} Question</span>
+            </div>
+            <span class="text-sm font-normal text-slate-600">Members: {{ getTeamMembers(team.teamMembers) }}</span>
+            <span class="text-sm font-normal text-slate-600">Created: {{ team.createdAt }}</span>
           </div>
-          <span class="text-sm font-normal text-slate-600">Members: {{ getTeamMembers(team.teamMembers) }}</span>
-          <span class="text-sm font-normal text-slate-600">Created: {{ team.createdAt }}</span>
-        </div>
-        <button @click.stop="openModal(team.id)"
-          class="flex justify-center items-center p-3 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200 cursor-pointer">
-          <i class='bx bx-trash text-base'></i>
-        </button>
-      </li>
+          <button @click.stop="openModal(team.id)"
+            class="flex justify-center items-center p-3 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200 cursor-pointer">
+            <i class='bx bx-trash text-base'></i>
+          </button>
+        </li>
+      </template>
     </ul>
     <Modal :show="isModalVisible" @no="closeModal" @yes="deleteTeam">
       <template #title>

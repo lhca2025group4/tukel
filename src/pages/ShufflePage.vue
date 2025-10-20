@@ -50,10 +50,10 @@ function shuffle() {
   resultShuffle.value = shuffleAndAssignTeam(tempTeam.value)
 }
 
-function choose() {
+async function choose() {
   const id = tempTeam.value.id
   mainStore.setTempTeamShuffled(resultShuffle.value)
-  mainStore.addNewTeam(tempTeam.value)
+  await mainStore.addNewTeam(tempTeam.value)
   mainStore.deleteTempTeam()
   router.push({ name: 'detail', params: { id } })
 }

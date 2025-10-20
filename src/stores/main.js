@@ -1,4 +1,24 @@
 import { defineStore } from 'pinia'
+import { insertNewTeam, deleteTeam } from '../firebase/teams'
+
+const messageObj = {
+  idle: {
+    status: 'idle',
+    message: '',
+  },
+  loading: {
+    status: 'loading',
+    message: 'Loading data from database.',
+  },
+  completed: {
+    status: 'completed',
+    message: 'Finished get data.',
+  },
+  error: {
+    status: 'error',
+    message: 'Failed get data.',
+  },
+}
 
 export const useMainStore = defineStore('main', {
   state: () => ({
@@ -12,21 +32,9 @@ export const useMainStore = defineStore('main', {
   }),
   getters: {},
   actions: {
-    setFetchStateIdle() {
-      this.fetchState.status = 'idle'
-      this.fetchState.message = ''
-    },
-    setFetchStateLoading() {
-      this.fetchState.status = 'loading'
-      this.fetchState.message = 'Loading data from database.'
-    },
-    setFetchStateCompleted() {
-      this.fetchState.status = 'completed'
-      this.fetchState.message = 'Finished get data.'
-    },
-    setFetchStateError() {
-      this.fetchState.status = 'error'
-      this.fetchState.message = 'Failed get data.'
+    setFetchState(status) {
+      this.fetchState.status = messageObj[status].status
+      this.fetchState.message = messageObj[status].message
     },
     setAllTeams(teams) {
       this.allTeams = teams
@@ -38,23 +46,23 @@ export const useMainStore = defineStore('main', {
       this.tempTeam.shuffledQuestion = questions
       this.tempTeam.isShuffled = true
     },
-    addNewTeam(team) {
+    async addNewTeam(team) {
       this.allTeams.push(team)
-      setLocalStorage(this.allTeams)
+      setTeamInLocalStorage(this.allTeams)
+      if (this.user && this.user.uid) {
+        await insertNewTeam(this.user.uid, team.id, team)
+      }
     },
     deleteTempTeam() {
       this.tempTeam = {}
     },
-    deleteAllTeams(id) {
-      const idx = this.allTeams.findIndex((team) => team.id === id)
-      console.log(idx)
-      if (idx !== -1) {
-        this.allTeams.splice(idx, 1)
+    async deleteAllTeams(id) {
+      const team = this.allTeams.find((team) => team.id === id)
+      if (team) team.isDeleted = true
+      setTeamInLocalStorage(this.allTeams)
+      if (this.user && this.user.uid) {
+        await deleteTeam(this.user.uid, team.id, team)
       }
-      setLocalStorage(this.allTeams)
-    },
-    getAllTeams() {
-      return getLocalStorage()
     },
     getTeamMembers(teamMembers) {
       return teamMembers.map((member) => member.name).join(', ')
@@ -72,17 +80,8 @@ export const useMainStore = defineStore('main', {
   },
 })
 
-function getLocalStorage() {
-  let teams = localStorage.getItem('teams')
-  if (teams) return JSON.parse(teams)
-
-  // If local storage empty
-  teams = []
-  localStorage.setItem('teams', JSON.stringify([]))
-  return teams
-}
-
-function setLocalStorage(data) {
+function setTeamInLocalStorage(data) {
   localStorage.setItem('teams', JSON.stringify(data))
+  localStorage.setItem('lastUpdated', Date.now())
   return 'Success storing data'
 }
