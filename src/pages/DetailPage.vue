@@ -88,6 +88,59 @@ async function toggleChecklist(teamId, questionIndex, nextValue) {
     console.error('Failed to update checklist on server:', err)
   }
 }
+
+function sanitizeCsvCell(value) {
+  if (value == null) return "";
+  const strValue = String(value);
+  if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
+    const escapedValue = strValue.replace(/"/g, '""');
+    return `"${escapedValue}"`;
+  }
+  return strValue;
+}
+
+function generateCsv(data) {
+  if (!data || data.length === 0) return null;
+
+  const headers = Array.from(data.reduce((acc, obj) => {
+    Object.keys(obj).forEach(key => acc.add(key));
+    return acc;
+  }, new Set()));
+
+  const headerRow = headers.join(',');
+  const dataRows = data.map(row =>
+    headers.map(header => sanitizeCsvCell(row[header])).join(',')
+  );
+
+  return [headerRow, ...dataRows].join('\n');
+}
+
+function downloadFile(content, fileName, mimeType = 'text/csv;charset=utf-8;') {
+  if (!content) return;
+  const blob = new Blob([content], { type: mimeType });
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(blob);
+  link.download = fileName;
+  link.style.display = "none";
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
+}
+
+function exportToCsv() {
+  const csvContent = generateCsv(specificTeam.value.shuffledQuestion);
+
+  if (csvContent) {
+    const safeName = (specificTeam.value.teamName || 'team').replace(/[^\w\s\-]/g, '').replace(/\s+/g, '_')
+    const filename = `${safeName}-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`
+    downloadFile(csvContent, filename);
+  } else {
+    alert("No data available to export.");
+  }
+}
 </script>
 
 <template>
@@ -104,7 +157,8 @@ async function toggleChecklist(teamId, questionIndex, nextValue) {
             <i class='bx bx-trash text-base'></i>
           </button>
           <button
-            class="flex sm:hidden justify-center items-center p-3 bg-emerald-600 text-white rounded hover:bg-emerald-600 transition duration-200 cursor-pointer text-base font-bold">
+            class="flex sm:hidden justify-center items-center p-3 bg-emerald-600 text-white rounded hover:bg-emerald-600 transition duration-200 cursor-pointer text-base font-bold"
+            @click="exportToCsv">
             Export to CSV
           </button>
         </div>
@@ -128,7 +182,7 @@ async function toggleChecklist(teamId, questionIndex, nextValue) {
         <div class="flex flex-row items-end">
           <span class="text-[40px] leading-[100%] text-slate-950 font-bold">{{
             getAccumulatedScore(specificTeam.shuffledQuestion)
-          }}</span>
+            }}</span>
           <span class="text-base text-slate-950 font-bold">/ {{ getTotalScore(specificTeam.shuffledQuestion) }}</span>
         </div>
       </div>

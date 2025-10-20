@@ -6,23 +6,13 @@ import { useMainStore } from './stores/main'
 import Header from './components/Header.vue'
 import Footer from './components/Footer.vue'
 import { getAllTeams, getTeamsMeta, setAllTeams } from './firebase/teams'
+import { toMillis } from './utils/teams'
 
 const route = useRoute()
 const currentRouteName = computed(() => route.name)
 
 const mainStore = useMainStore()
 const { user } = storeToRefs(mainStore)
-
-const toMillis = (v) => {
-  if (!v) return 0
-  if (typeof v === 'number') return v
-  if (v?.toMillis && typeof v.toMillis === 'function') return v.toMillis()
-  if (typeof v === 'string') {
-    const p = Date.parse(v)
-    return Number.isNaN(p) ? 0 : p
-  }
-  return 0
-}
 
 async function getTeams() {
   const localRaw = localStorage.getItem('teams')

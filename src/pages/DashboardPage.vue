@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useMainStore } from '../stores/main'
 import { useRouter } from 'vue-router'
 import Modal from '../components/Modal.vue'
+import { toMillis } from '../utils/teams'
 
 const router = useRouter()
 const mainStore = useMainStore()
@@ -29,28 +30,6 @@ async function deleteTeam() {
 }
 function createNewTeam() {
   router.push({ name: 'create-new' })
-}
-
-const toMillis = (v) => {
-  if (!v) return 0
-  if (v?.toMillis && typeof v.toMillis === 'function') return v.toMillis()
-  if (typeof v === 'object') {
-    const seconds = v.seconds ?? v._seconds
-    const nanos = v.nanoseconds ?? v._nanoseconds
-    if (typeof seconds === 'number') {
-      const msFromSeconds = seconds * 1000
-      const msFromNanos = typeof nanos === 'number' ? Math.floor(nanos / 1e6) : 0
-      return msFromSeconds + msFromNanos
-    }
-  }
-  if (typeof v === 'number') {
-    return v < 1e12 ? v * 1000 : v
-  }
-  if (typeof v === 'string') {
-    const p = Date.parse(v)
-    return Number.isNaN(p) ? 0 : p
-  }
-  return 0
 }
 
 const formatDate = (v) => {
@@ -86,7 +65,7 @@ const formatDate = (v) => {
               <span class="hidden md:block text-base font-semibold text-slate-950">|</span>
               <span class="text-base font-semibold text-slate-950">Score {{ getTotalScore(team.shuffledQuestion) }} / {{
                 getAccumulatedScore(team.shuffledQuestion)
-              }}</span>
+                }}</span>
               <span class="text-base font-semibold text-slate-950">|</span>
               <span class="text-base font-semibold text-slate-950">{{ team.teamQuestions.length }} Question</span>
             </div>
