@@ -6,6 +6,7 @@ import { useMainStore } from '@/stores/main'
 import { useRoute, useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useTemplateRef } from 'vue'
+import { updateTeam } from '../firebase/teams'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,6 +20,8 @@ const inputTeamNameRef = useTemplateRef('inputTeamNameRef')
 const specificTeam = computed(() => {
   return allTeams.value.find(team => team.id === id)
 })
+
+const { user } = storeToRefs(mainStore)
 
 const isModalVisible = ref(false)
 
@@ -42,6 +45,48 @@ function startEditName() {
 }
 function endEditName() {
   isEditTeamName.value = false
+  renameTeam(specificTeam.value.id, specificTeam.value.teamName)
+}
+
+function persistLocalTeams(teams) {
+  mainStore.setAllTeams(teams)
+  localStorage.setItem('teams', JSON.stringify(teams))
+  localStorage.setItem('teams_updatedAt', String(Date.now()))
+}
+
+async function renameTeam(teamId, newName) {
+  const teams = (allTeams.value || []).map(t => t.id === teamId ? { ...t, teamName: newName, updatedAt: Date.now() } : t)
+  persistLocalTeams(teams)
+
+  try {
+    if (user?.value?.uid) {
+      await updateTeam(user.value.uid, teamId, { teamName: newName })
+    }
+  } catch (err) {
+    console.error('Failed to update team name on server:', err)
+  }
+}
+
+async function toggleChecklist(teamId, questionIndex, nextValue) {
+  const teamsCopy = (allTeams.value || []).map(t => ({ ...t }))
+  const team = teamsCopy.find(t => t.id === teamId)
+  if (!team) return
+
+  const questions = (team.shuffledQuestion || []).map(q => ({ ...q }))
+  questions[questionIndex].isFinished = nextValue
+  team.shuffledQuestion = questions
+  team.updatedAt = Date.now()
+
+  const newTeams = teamsCopy.map(t => t.id === teamId ? team : t)
+  persistLocalTeams(newTeams)
+
+  try {
+    if (user?.value?.uid) {
+      await updateTeam(user.value.uid, teamId, { shuffledQuestion: questions })
+    }
+  } catch (err) {
+    console.error('Failed to update checklist on server:', err)
+  }
 }
 </script>
 
@@ -104,7 +149,8 @@ function endEditName() {
         <div class="flex items-center justify-between gap-2">
           <span>{{ item.name }}</span>
           <label :for="`toggle-switch-${idx}`" class="relative inline-block w-11 h-6 cursor-pointer">
-            <input v-model="item.isFinished" type="checkbox" :id="`toggle-switch-${idx}`" class="sr-only peer">
+            <input v-model="item.isFinished" type="checkbox" :id="`toggle-switch-${idx}`" class="sr-only peer"
+              @change="toggleChecklist(specificTeam.id, idx, $event.target.checked)">
             <span
               class="block w-full h-full bg-slate-200 rounded-full peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 peer-checked:bg-emerald-600 transition-colors"></span>
             <span
