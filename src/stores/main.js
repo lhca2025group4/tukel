@@ -82,6 +82,6 @@ export const useMainStore = defineStore('main', {
 
 function setTeamInLocalStorage(data) {
   localStorage.setItem('teams', JSON.stringify(data))
-  localStorage.setItem('lastUpdated', Date.now())
+  localStorage.setItem('teams_updatedAt', Date.now())
   return 'Success storing data'
 }

@@ -30,6 +30,35 @@ async function deleteTeam() {
 function createNewTeam() {
   router.push({ name: 'create-new' })
 }
+
+const toMillis = (v) => {
+  if (!v) return 0
+  if (v?.toMillis && typeof v.toMillis === 'function') return v.toMillis()
+  if (typeof v === 'object') {
+    const seconds = v.seconds ?? v._seconds
+    const nanos = v.nanoseconds ?? v._nanoseconds
+    if (typeof seconds === 'number') {
+      const msFromSeconds = seconds * 1000
+      const msFromNanos = typeof nanos === 'number' ? Math.floor(nanos / 1e6) : 0
+      return msFromSeconds + msFromNanos
+    }
+  }
+  if (typeof v === 'number') {
+    return v < 1e12 ? v * 1000 : v
+  }
+  if (typeof v === 'string') {
+    const p = Date.parse(v)
+    return Number.isNaN(p) ? 0 : p
+  }
+  return 0
+}
+
+const formatDate = (v) => {
+  const ms = toMillis(v)
+  if (!ms) return '-'
+  const d = new Date(ms)
+  return d.toLocaleString()
+}
 </script>
 
 <template>
@@ -57,12 +86,12 @@ function createNewTeam() {
               <span class="hidden md:block text-base font-semibold text-slate-950">|</span>
               <span class="text-base font-semibold text-slate-950">Score {{ getTotalScore(team.shuffledQuestion) }} / {{
                 getAccumulatedScore(team.shuffledQuestion)
-                }}</span>
+              }}</span>
               <span class="text-base font-semibold text-slate-950">|</span>
               <span class="text-base font-semibold text-slate-950">{{ team.teamQuestions.length }} Question</span>
             </div>
             <span class="text-sm font-normal text-slate-600">Members: {{ getTeamMembers(team.teamMembers) }}</span>
-            <span class="text-sm font-normal text-slate-600">Created: {{ team.createdAt }}</span>
+            <span class="text-sm font-normal text-slate-600">Created: {{ formatDate(team.createdAt) }}</span>
           </div>
           <button @click.stop="openModal(team.id)"
             class="flex justify-center items-center p-3 bg-red-500 text-white rounded hover:bg-red-600 transition duration-200 cursor-pointer">
