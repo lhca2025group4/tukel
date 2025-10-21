@@ -1,26 +1,38 @@
 <script setup>
 import { useMainStore } from '@/stores/main'
+import { storeToRefs } from 'pinia'
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const mainStore = useMainStore()
-
+const { inputTeamName: teamName, inputTeam: teamMembers, inputQuestion: teamQuestions } = storeToRefs(mainStore)
 const uuid = ref("")
-const teamName = ref("")
-const teamMembers = ref([{
-  id: 1,
-  name: ''
-}])
-const teamQuestions = ref([{
-  id: 1,
-  question: '',
-  score: 10,
-  isFinished: false
-}])
 
-const isTeamMemberEmpty = computed(() => teamMembers.value.some(m => m.name.trim() === ""))
-const isTeamQuestionEmpty = computed(() => teamQuestions.value.some(q => q.question.trim() === ""))
+const isTeamMemberEmpty = computed(() => {
+  if (!Array.isArray(teamMembers.value) || teamMembers.value.length === 0) return true
+  if (teamMembers.value.length === 1 && (teamMembers.value[0].name ?? '').trim() === '') return true
+  return false
+})
+const isTeamQuestionEmpty = computed(() => {
+  if (!Array.isArray(teamQuestions.value) || teamQuestions.value.length === 0) return true
+  if (teamQuestions.value.length === 1 && (teamQuestions.value[0].question ?? '').trim() === '') return true
+  return false
+})
+
+function cleanupAndReindex() {
+  const members = (teamMembers.value || [])
+    .map(m => ({ id: m.id, name: (m.name ?? '').trim() }))
+    .filter(m => m.name !== '')
+    .map((m, i) => ({ ...m, id: i + 1 }))
+
+  const questions = (teamQuestions.value || [])
+    .map(q => ({ id: q.id, question: (q.question ?? '').trim(), score: Number(q.score) || 0, isFinished: !!q.isFinished }))
+    .filter(q => q.question !== '')
+    .map((q, i) => ({ ...q, id: i + 1 }))
+
+  return { members, questions }
+}
 
 function insertedData() {
   teamName.value = "Team Alpha"
@@ -51,14 +63,17 @@ function insertedData() {
 }
 
 function addNewTeam() {
+  const { members, questions } = cleanupAndReindex()
+  if (members.length === 0 || questions.length === 0) return
+
   uuid.value = crypto.randomUUID()
   const milliseconds = Date.now()
   const unixTimestamp = Math.floor(milliseconds / 1000)
   const obj = {
     id: uuid.value,
-    teamName: teamName.value,
-    teamMembers: teamMembers.value,
-    teamQuestions: teamQuestions.value,
+    teamName: teamName.value.trim(),
+    teamMembers: members,
+    teamQuestions: questions,
     isDeleted: false,
     createdAt: unixTimestamp,
     updatedAt: unixTimestamp,
@@ -67,6 +82,10 @@ function addNewTeam() {
   }
   mainStore.setTempTeam(obj)
   router.push({ name: 'shuffle', params: { id: uuid.value } })
+}
+
+function resetTeam() {
+  mainStore.resetTeam()
 }
 </script>
 
@@ -78,11 +97,18 @@ function addNewTeam() {
         <input v-model="teamName" type="text" placeholder="Enter team name"
           class="w-full p-3 border bg-white border-slate-300 rounded focus:outline-emerald-500 focus:ring-1 focus:ring-emerald-500" />
       </div>
-      <button @click="addNewTeam" class="  p-3 rounded transition duration-200 text-base font-bold whitespace-nowrap"
-        :class="isTeamMemberEmpty || isTeamQuestionEmpty ? 'bg-slate-200 cursor-not-allowed text-slate-600' : 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer'"
-        :disabled="isTeamMemberEmpty || isTeamQuestionEmpty">
-        Start Shuffle
-      </button>
+      <div class="flex gap-3">
+        <button @click="resetTeam"
+          class="flex-1 md:flex-none lg:flex-none xl:flex-none p-3 rounded transition duration-200 text-base font-bold whitespace-nowrap text-slate-600 border border-slate-300 cursor-pointer">
+          Reset
+        </button>
+        <button @click="addNewTeam"
+          class="flex-1 md:flex-none lg:flex-none xl:flex-none p-3 rounded transition duration-200 text-base font-bold whitespace-nowrap"
+          :class="isTeamMemberEmpty || isTeamQuestionEmpty ? 'bg-slate-200 cursor-not-allowed text-slate-600' : 'bg-emerald-600 hover:bg-emerald-500 text-white cursor-pointer'"
+          :disabled="isTeamMemberEmpty || isTeamQuestionEmpty">
+          Start Shuffle
+        </button>
+      </div>
     </div>
     <div class="h-[1px] bg-slate-200 sm:hidden"></div>
     <div class="flex gap-6 sm:gap-10 flex-col sm:flex-row">

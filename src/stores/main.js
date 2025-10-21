@@ -29,6 +29,21 @@ export const useMainStore = defineStore('main', {
     },
     tempTeam: {},
     allTeams: [],
+    inputTeamName: '',
+    inputTeam: [
+      {
+        id: 1,
+        name: '',
+      },
+    ],
+    inputQuestion: [
+      {
+        id: 1,
+        question: '',
+        score: 10,
+        isFinished: false,
+      },
+    ],
   }),
   getters: {},
   actions: {
@@ -76,6 +91,23 @@ export const useMainStore = defineStore('main', {
       return shuffledQuestion
         .filter((question) => question.isFinished)
         .reduce((total, question) => total + question.score, 0)
+    },
+    resetTeam() {
+      this.inputTeamName = ''
+      this.inputTeam = [
+        {
+          id: 1,
+          name: '',
+        },
+      ]
+      this.inputQuestion = [
+        {
+          id: 1,
+          question: '',
+          score: 10,
+          isFinished: false,
+        },
+      ]
     },
   },
 })
