@@ -81,11 +81,11 @@ const formatDate = (v) => {
     </ul>
     <Modal :show="isModalVisible" @no="closeModal" @yes="deleteTeam">
       <template #title>
-        <h2 class="text-slate-950 text-2xl font-semibold">This is a Teleported Modal!</h2>
+        <h2 class="text-slate-950 text-2xl font-semibold">Are you sure to delete?</h2>
       </template>
       <template #body>
         <p class="text-slate-600">
-          The HTML for this modal is rendered at the end of the `
+          All data of team will delete. You can’t revert this action
         </p>
       </template>
     </Modal>
