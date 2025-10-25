@@ -46,7 +46,7 @@ const formatDate = (v) => {
       <p v-if="allTeams.length === 0" class="text-base text-slate-950 grow">You haven’t create any team.</p>
       <button @click="createNewTeam"
         class="bg-emerald-600 text-white p-3 rounded hover:bg-emerald-500 transition duration-200 text-base font-bold cursor-pointer whitespace-nowrap"
-        :class="{ 'w-full': allTeams.length === 0 }">
+        :class="{ 'w-full': allTeams.length !== 0 }">
         Create New
       </button>
     </div>
@@ -65,7 +65,7 @@ const formatDate = (v) => {
               <span class="hidden md:block text-base font-semibold text-slate-950">|</span>
               <span class="text-base font-semibold text-slate-950">Score {{ getTotalScore(team.shuffledQuestion) }} / {{
                 getAccumulatedScore(team.shuffledQuestion)
-                }}</span>
+              }}</span>
               <span class="text-base font-semibold text-slate-950">|</span>
               <span class="text-base font-semibold text-slate-950">{{ team.teamQuestions.length }} Question</span>
             </div>
